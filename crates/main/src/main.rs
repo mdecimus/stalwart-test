@@ -20,7 +20,11 @@ use std::time::Duration;
 use trc::Collector;
 use utils::wait_for_shutdown;
 
-#[cfg(all(target_arch = "x86_64", target_feature = "sse4.2"))]
+#[cfg(all(
+    target_arch = "x86_64",
+    target_feature = "sse4.2",
+    any(target_os = "linux", target_os = "freebsd")
+))]
 mod cpu;
 #[cfg(feature = "dev_mode")]
 pub mod test_data;
@@ -32,17 +36,8 @@ use tikv_jemallocator::Jemalloc;
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
 
-fn main() -> std::io::Result<()> {
-    #[cfg(all(target_arch = "x86_64", target_feature = "sse4.2"))]
-    cpu::assert_x86_64_v2();
-
-    tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()?
-        .block_on(Box::pin(run()))
-}
-
-async fn run() -> std::io::Result<()> {
+#[tokio::main]
+async fn main() -> std::io::Result<()> {
     // Install AWS-LC-RS as the default Rustls crypto provider
     rustls::crypto::aws_lc_rs::default_provider()
         .install_default()
