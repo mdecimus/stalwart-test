@@ -156,6 +156,7 @@ jobs:
             build_env: ""
     name: Build / ${{matrix.target}}
     runs-on: ${{matrix.runner}}
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -275,6 +276,7 @@ jobs:
         uses: docker/bake-action@v7
         env:
           DOCKER_BUILD_RECORD_UPLOAD: false
+          GITHUB_TOKEN: ${{github.token}}
           TARGET: ${{matrix.target}}
           GHCR_REPO: ghcr.io/${{github.repository}}
           BUILD_ENV: ${{matrix.build_env}}
